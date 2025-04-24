@@ -1,0 +1,9 @@
+# cmake build directory
+/build
+
+# user-specific vscode files
+/.vscode
+/.cache
+
+# dotenv
+/.env
