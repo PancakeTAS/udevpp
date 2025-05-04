@@ -27,16 +27,16 @@ Device Device::getParent() {
     struct udev_device* parent = udev_device_get_parent(this->dev);
     if (!parent)
         throw std::runtime_error("Failed to get parent device");
-    return Device(parent);
+    return {parent};
 }
 
 Device Device::getParentWithSubsystemDevtype(
-    const std::string_view subsystem, const std::string_view devtype) {
+    const std::string& subsystem, const std::string& devtype) {
     struct udev_device* parent = udev_device_get_parent_with_subsystem_devtype(
-        this->dev, subsystem.data(), devtype.data());
+        this->dev, subsystem.c_str(), devtype.c_str());
     if (!parent)
         throw std::runtime_error("Failed to get parent device with subsystem and devtype");
-    return Device(parent);
+    return {parent};
 }
 
 
@@ -63,32 +63,32 @@ uint64_t Device::getSeqnum() { return udev_device_get_seqnum(this->dev); }
 uint64_t Device::getUsecSinceInitialized() { return udev_device_get_usec_since_initialized(this->dev); }
 bool Device::isInitialized() { return udev_device_get_is_initialized(this->dev); }
 
-std::string Device::getProperty(std::string_view key) {
-    const char* val = udev_device_get_property_value(this->dev, key.data());
+std::string Device::getProperty(const std::string& key) {
+    const char* val = udev_device_get_property_value(this->dev, key.c_str());
     if (!val)
         throw std::runtime_error("Failed to get property value");
-    return std::string(val);
+    return {val};
 }
 
-std::string Device::getSysattr(std::string_view sysattr) {
-    const char* val = udev_device_get_sysattr_value(this->dev, sysattr.data());
+std::string Device::getSysattr(const  std::string& sysattr) {
+    const char* val = udev_device_get_sysattr_value(this->dev, sysattr.c_str());
     if (!val)
         throw std::runtime_error("Failed to get sysattr value");
-    return std::string(val);
+    return {val};
 }
 
 
-bool Device::hasTag(std::string_view tag) {
-    return udev_device_has_tag(this->dev, tag.data());
+bool Device::hasTag(const  std::string& tag) {
+    return udev_device_has_tag(this->dev, tag.c_str());
 }
 
-bool Device::hasCurrentTag(std::string_view tag) {
-    return udev_device_has_current_tag(this->dev, tag.data());
+bool Device::hasCurrentTag(const  std::string& tag) {
+    return udev_device_has_current_tag(this->dev, tag.c_str());
 }
 
 
-void Device::setSysattr(std::string_view sysattr, std::string_view value) {
-    if (udev_device_set_sysattr_value(this->dev, sysattr.data(), value.data()) < 0)
+void Device::setSysattr(const  std::string& sysattr, const  std::string& value) {
+    if (udev_device_set_sysattr_value(this->dev, sysattr.c_str(), value.c_str()) < 0)
         throw std::runtime_error("Failed to set sysattr value");
 }
 
@@ -99,11 +99,11 @@ std::vector<std::string> Device::getDevlinks() {
     if (!devlink)
         throw std::runtime_error("Failed to get device links");
 
-    struct udev_list_entry* entry;
+    struct udev_list_entry* entry = nullptr;
     udev_list_entry_foreach(entry, devlink) {
         const char* val = udev_list_entry_get_name(entry);
         if (val)
-            devlinks.push_back(std::string(val));
+            devlinks.emplace_back(val);
     }
     return devlinks;
 }
@@ -114,11 +114,11 @@ std::vector<std::string> Device::getTags() {
     if (!tag)
         throw std::runtime_error("Failed to get device tags");
 
-    struct udev_list_entry* entry;
+    struct udev_list_entry* entry = nullptr;
     udev_list_entry_foreach(entry, tag) {
         const char* val = udev_list_entry_get_name(entry);
         if (val)
-            tags.push_back(std::string(val));
+            tags.emplace_back(val);
     }
     return tags;
 }
@@ -129,11 +129,11 @@ std::vector<std::string> Device::getCurrentTags() {
     if (!tag)
         throw std::runtime_error("Failed to get current device tags");
 
-    struct udev_list_entry* entry;
+    struct udev_list_entry* entry = nullptr;
     udev_list_entry_foreach(entry, tag) {
         const char* val = udev_list_entry_get_name(entry);
         if (val)
-            current_tags.push_back(std::string(val));
+            current_tags.emplace_back(val);
     }
     return current_tags;
 }
@@ -145,7 +145,7 @@ std::unordered_map<std::string, std::string> Device::getProperties() {
     if (!prop)
         throw std::runtime_error("Failed to get device properties");
 
-    struct udev_list_entry* entry;
+    struct udev_list_entry* entry = nullptr;
     udev_list_entry_foreach(entry, prop) {
         const char* key = udev_list_entry_get_name(entry);
         const char* value = udev_list_entry_get_value(entry);
@@ -161,7 +161,7 @@ std::unordered_map<std::string, std::string> Device::getSysattrs() {
     if (!sysattr)
         throw std::runtime_error("Failed to get device sysattrs");
 
-    struct udev_list_entry* entry;
+    struct udev_list_entry* entry = nullptr;
     udev_list_entry_foreach(entry, sysattr) {
         const char* key = udev_list_entry_get_name(entry);
         const char* value = udev_list_entry_get_value(entry);

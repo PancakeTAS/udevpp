@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <string>
-#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -34,7 +33,7 @@ namespace Udev {
             Device getParent();
 
             /// Get the parent device with the given subsystem and device type
-            Device getParentWithSubsystemDevtype(std::string_view subsystem, std::string_view devtype);
+            Device getParentWithSubsystemDevtype(const std::string& subsystem, const std::string& devtype);
 
 
             /// Get the device path (e.g. /devices/pci0000:00/0000:00:03.1/0000:0a:00.0/drm/card1)
@@ -59,7 +58,7 @@ namespace Udev {
             std::string getDevnode();
 
             /// Get a specific property value (e.g. MAJOR=226)
-            std::string getProperty(std::string_view key);
+            std::string getProperty(const std::string& key);
 
             /// Get the device driver (e.g. nvidia)
             std::string getDriver();
@@ -80,18 +79,18 @@ namespace Udev {
             bool isInitialized();
 
             /// Get a sysattr value (e.g. power_state = D0)
-            std::string getSysattr(std::string_view sysattr);
+            std::string getSysattr(const std::string& sysattr);
 
 
             /// Check if the device has a specific tag
-            bool hasTag(std::string_view tag);
+            bool hasTag(const std::string& tag);
 
             /// Check if the device has a current tag
-            bool hasCurrentTag(std::string_view tag);
+            bool hasCurrentTag(const std::string& tag);
 
 
             /// Set a sysattr value
-            void setSysattr(std::string_view sysattr, std::string_view value);
+            void setSysattr(const std::string& sysattr, const std::string& value);
 
 
             /// Get all links pointing to this device
@@ -113,6 +112,11 @@ namespace Udev {
 
             /// Decrease the reference count of the udev device
             ~Device();
+
+            Device(const Device &) = delete;
+            Device(Device &&) = delete;
+            Device &operator=(const Device &) = delete;
+            Device &operator=(Device &&) = delete;
 
         private:
             struct udev_device* dev;

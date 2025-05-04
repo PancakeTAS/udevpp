@@ -2,7 +2,6 @@
 #define MONITOR_HPP
 
 #include <optional>
-#include <string_view>
 
 #include <libudev.h>
 
@@ -18,7 +17,7 @@ namespace Udev {
         public:
 
             /// Create a new udev monitor with the given udev monitor, increasing the reference count
-            Monitor(struct udev_monitor* ctx);
+            Monitor(struct udev_monitor* mon);
 
 
             /// Get the contained udev monitor, increasing the reference count
@@ -29,10 +28,10 @@ namespace Udev {
 
 
             /// Match for subsystem and device type
-            void filterSubsystemDevtype(std::string_view subsystem, std::optional<std::string_view> devtype);
+            void filterSubsystemDevtype(const std::string& subsystem, std::optional<std::string> devtype);
 
             /// Match for a tag
-            void filterTag(std::string_view tag);
+            void filterTag(const std::string& tag);
 
 
             /// Update the filter
@@ -58,11 +57,16 @@ namespace Udev {
             /// Decrease the reference count of the udev monitor
             ~Monitor();
 
+            Monitor(const Monitor &) = delete;
+            Monitor(Monitor &&) = delete;
+            Monitor &operator=(const Monitor &) = delete;
+            Monitor &operator=(Monitor &&) = delete;
+
         private:
             struct udev_monitor* mon;
             int fd;
 
-            Monitor(struct udev_monitor* dev, bool ref);
+            Monitor(struct udev_monitor* mon, bool ref);
 
     };
 

@@ -17,7 +17,7 @@ Monitor::Monitor(struct udev_monitor* mon, bool ref) : mon(mon) {
         throw std::runtime_error("Failed to get file descriptor");
 }
 
-Monitor::Monitor(struct udev_monitor* dev) : Monitor(dev, true) {}
+Monitor::Monitor(struct udev_monitor* mon) : Monitor(mon, true) {}
 
 
 struct udev_monitor* Monitor::get() {
@@ -29,14 +29,14 @@ struct udev_monitor* Monitor::_get() {
 }
 
 
-void Monitor::filterSubsystemDevtype(std::string_view subsystem, std::optional<std::string_view> devtype) {
-    const char* devtype_str = devtype ? devtype->data() : NULL;
-    if (udev_monitor_filter_add_match_subsystem_devtype(this->mon, subsystem.data(), devtype_str) < 0)
+void Monitor::filterSubsystemDevtype(const std::string& subsystem, std::optional<std::string> devtype) {
+    const char* devtype_str = devtype ? devtype->c_str() : nullptr;
+    if (udev_monitor_filter_add_match_subsystem_devtype(this->mon, subsystem.c_str(), devtype_str) < 0)
         throw std::runtime_error("Failed to add filter");
 }
 
-void Monitor::filterTag(std::string_view tag) {
-    if (udev_monitor_filter_add_match_tag(this->mon, tag.data()) < 0)
+void Monitor::filterTag(const std::string& tag) {
+    if (udev_monitor_filter_add_match_tag(this->mon, tag.c_str()) < 0)
         throw std::runtime_error("Failed to add filter");
 }
 
@@ -68,11 +68,11 @@ bool Monitor::canReceive() {
     FD_ZERO(&fds);
     FD_SET(this->fd, &fds);
 
-    struct timeval tv;
+    struct timeval tv {};
     tv.tv_sec = 0;
     tv.tv_usec = 0;
 
-    int ret = select(this->fd + 1, &fds, NULL, NULL, &tv);
+    int ret = select(this->fd + 1, &fds, nullptr, nullptr, &tv);
     if (ret < 0)
         throw std::runtime_error("Failed to select");
     return ret > 0 && FD_ISSET(this->fd, &fds);
@@ -82,7 +82,7 @@ Device Monitor::receive() {
     struct udev_device* dev = udev_monitor_receive_device(this->mon);
     if (!dev)
         throw std::runtime_error("Failed to receive device");
-    return Device(dev, false);
+    return {dev, false};
 }
 
 

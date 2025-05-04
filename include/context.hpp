@@ -2,7 +2,6 @@
 #define CONTEXT_HPP
 
 #include <cstdint>
-#include <string_view>
 
 #include <libudev.h>
 
@@ -19,7 +18,8 @@ namespace Udev {
             /// Create a new udev context
             Context();
 
-            /// Create a new udev context with the given udev context, increasing the reference count
+            /// Create a new udev context with the given udev context,
+            /// increasing the reference count
             Context(struct udev* ctx);
 
 
@@ -31,29 +31,34 @@ namespace Udev {
 
 
             /// Get a udev device from a syspath
-            Device getDeviceFromSyspath(std::string_view syspath);
+            Device getDeviceFromSyspath(const std::string& syspath);
 
             /// Get a udev device from a devnum
-            enum DevnumType { BLOCK, CHAR };
+            enum DevnumType : uint8_t { BLOCK, CHAR };
             Device getDeviceFromDevnum(DevnumType type, uint64_t devnum);
 
             /// Get a udev device via subsystem and sysname
-            Device getDeviceFromSubsystemSysname(std::string_view subsystem, std::string_view sysname);
+            Device getDeviceFromSubsystemSysname(const std::string& subsystem, const std::string& sysname);
 
             /// Get a udev device from its device id
-            Device getDeviceFromId(std::string_view id);
+            Device getDeviceFromId(const std::string& id);
 
             /// Get a udev device from the environment
             Device getDeviceFromEnv();
 
 
             /// Create a monitor for the udev context
-            enum MonitorType { UDEV, KERNEL };
+            enum MonitorType : uint8_t { UDEV, KERNEL };
             Monitor createMonitor(MonitorType type);
 
 
             /// Decrease the reference count of the udev context
             ~Context();
+
+            Context(const Context &) = delete;
+            Context(Context &&) = delete;
+            Context &operator=(const Context &) = delete;
+            Context &operator=(Context &&) = delete;
 
         private:
             struct udev* ctx;
